@@ -2,17 +2,19 @@ from pysnmp.hlapi import getCmd, SnmpEngine, UdpTransportTarget, ContextData, Ob
 
 
 ip=['10.10.10.100','10.10.10.101','10.10.10.102','10.10.10.103']
-comunidad='carlos'
+comunidad=['carlos','chile','Prueba','Prueba2']
 
-router=input("Dime la IP del router a consultar: ")
+routers=dict(zip(ip,comunidad))
 
-for linea in ip:
-    if router == linea:
-        print(linea)
+
+for ips,comunidades in routers.items():
+    varip=input("Introduce la IP: ")
+    varcomunidad=input("Introduce el nombre de la comunidad: ")
+    if varip == ips and varcomunidad == comunidades:
         iterator = getCmd(
             SnmpEngine(),
-            CommunityData(comunidad, mpModel=0), # En vez de public va el nombre de la comunidad que se le de al router.
-            UdpTransportTarget((linea, 161)),
+            CommunityData(comunidades, mpModel=0), # En vez de public va el nombre de la comunidad que se le de al router.
+            UdpTransportTarget((ips, 161)),
             ContextData(),
             ObjectType(ObjectIdentity('.1.3.6.1.2.1.1.1.0'))
         )#buscar el OID del router.
