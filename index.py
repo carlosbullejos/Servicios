@@ -1,18 +1,4 @@
 from pysnmp.hlapi import getCmd, SnmpEngine, UdpTransportTarget, ContextData, ObjectType, ObjectIdentity, CommunityData
-from netmiko import ConnectHandler
-
-cisco_881 = {
-    'device_type': 'cisco_ios',
-    'host':   '10.10.10.101',
-    'username': 'admin',
-    'password': 'admin',
-    'port' : 22,          # optional, defaults to 22
-    'secret': '',     # optional, defaults to ''
-}
-net_connect = ConnectHandler(**cisco_881)
-output = net_connect.send_command('show ip int brief')
-print(output)
-
 
 ip=['10.10.10.101','10.10.10.102','10.10.10.103','10.10.10.104']
 comunidad=['china','camerun','canada','chile']
@@ -39,7 +25,7 @@ for ips,comunidades in routers.items():
         elif errorStatus:
                 print('%s at %s' % (errorStatus.prettyPrint(),
                                     errorIndex and varBinds[int(errorIndex) - 1][0] or '?'))
-
         else:
-                for varBind in varBinds:
-                    print(' = '.join([x.prettyPrint() for x in varBind]))
+            for varBind in varBinds:
+             print(' = '.join([x.prettyPrint() for x in varBind]))
+    
