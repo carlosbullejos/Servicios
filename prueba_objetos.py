@@ -4,13 +4,13 @@ from netmiko import ConnectHandler
 
 # Definimos la clase Router
 class Router:
-    def __init__(self, device_type_var, host_var, username_var, password_var, port_var=22):
+    def __init__(self, device_type, host, username, password, port=22):
         # Constructor para inicializar los atributos del router
-        self.device_type = device_type_var
-        self.host = host_var
-        self.username = username_var
-        self.password = password_var
-        self.port = port_var
+        self.device_type = device_type
+        self.host = host
+        self.username = username
+        self.password = password
+        self.port = port
 
     def conexion(self):
         # Crear el diccionario con las opciones de conexión
@@ -40,12 +40,8 @@ if __name__ == "__main__":
         elif router_pregunta == "mikrotik":
         # Crear instancias de la clase Router para cada dispositivo
             mikrotik = Router("mikrotik_routeros", "10.10.10.103", "admin", "admin", 22)
-
-            # Conectar a los routers
-            mikrotik.conexion()
-
-            # Enviar comandos a los routers
-            mikrotik.comando("ip address print")
+            mikrotik.conexion() # Conectar a los routers
+            mikrotik.comando("ip address print")    # Enviar comandos a los routers
         elif router_pregunta == "cisco": 
             cisco= Router("cisco_ios","10.10.10.101","admin","admin",22)
             cisco.conexion()
