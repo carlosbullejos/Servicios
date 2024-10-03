@@ -28,4 +28,3 @@ for ips,comunidades in routers.items():
         else:
             for varBind in varBinds:
              print(' = '.join([x.prettyPrint() for x in varBind]))
-    
