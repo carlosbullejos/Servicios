@@ -1,6 +1,0 @@
-/ip address add address=10.10.11.2/24 interface=ether1
-/ip address add address=10.10.12.1/24 interface=ether2
-/routing ospf instance set 0 router-id=10.10.11.2
-/routing ospf network add area=backbone network=10.10.11.0/24
-/routing ospf network add area=backbone network=10.10.12.0/24
-
