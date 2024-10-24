@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
          name: terraform_state
-         path: vpcs/vpcs.tfstate
+         path: terraform.tfstate
