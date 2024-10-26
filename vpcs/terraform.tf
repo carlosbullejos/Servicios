@@ -3,7 +3,7 @@ provider "aws" {
 }
 resource "aws_default_vpc" "default" {
   tags = {
-    Name = "Mi segunda VPC"
+    Name = "VPC Proyecto Servicios"
   }
 	
 }
