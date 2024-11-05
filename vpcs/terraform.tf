@@ -115,6 +115,13 @@ resource "aws_security_group" "ftp_security_group" {
     cidr_blocks = [var.allowed_cidr]
   }
 
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_cidr]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
