@@ -39,8 +39,10 @@ jobs:
         run: terraform apply -auto-approve
         working-directory: vpcs
 
-      - name: Subir estado de Terraform
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform_state
-          path: vpcs/terraform.tfstate
+      - name: Subir estado de Terraform a S3
+        run: |
+          aws s3 cp vpcs/terraform.tfstate s3://s3-carlosbullejos2-bucket/terraform.tfstate
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1" # Cambia a la región de AWS que estás usando
