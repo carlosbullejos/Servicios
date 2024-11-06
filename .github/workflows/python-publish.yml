@@ -43,12 +43,8 @@ jobs:
       - name: Crear Docker Container para FTP
         run: |
           docker build -t myproftpd .
-          docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 \
-            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            -e AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }} \
-            myproftpd
-        # Las credenciales de AWS se pasan como variables de entorno aquí
+          docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 myproftpd
+        # El contenedor Docker ahora usará las credenciales de AWS configuradas previamente
 
       - name: Subir estado de Terraform a S3
         run: |
@@ -58,6 +54,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "us-east-1" # Cambia a la región de AWS que estás usando
 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "us-east-1"  # Cambia a la región de AWS que estás usando
 
