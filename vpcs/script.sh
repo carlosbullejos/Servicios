@@ -50,7 +50,8 @@ CMD ["proftpd", "--nodaemon"]
 EOF
 
 # Construcción del contenedor Docker
-sudo docker build -t myproftpd /home/docker
+cd /home/docker
+sudo docker build -t myproftpd .
 
 # Ejecutar el contenedor Docker pasando las credenciales de AWS como variables de entorno
 sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 \
@@ -58,5 +59,3 @@ sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 \
     -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
     -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
     myproftpd
-
-
