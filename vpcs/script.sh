@@ -34,7 +34,6 @@ RUN apt-get update && apt-get install -y \
 # Configuración del FTP
 RUN echo 'PassivePorts 1100 1101' >> /etc/proftpd/proftpd.conf
 RUN echo 'DefaultRoot ~' >> /etc/proftpd/proftpd.conf
-RUN echo 'MasqueradeAddress 54.159.37.114' >> /etc/proftpd/proftpd.conf
 EXPOSE 20 21 1100 1101
 
 # Crear usuario FTP
