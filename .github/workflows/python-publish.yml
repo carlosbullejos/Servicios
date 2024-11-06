@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - vpcs
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -39,6 +40,12 @@ jobs:
         run: terraform apply -auto-approve
         working-directory: vpcs
 
+      - name: Crear Docker Container para FTP
+        run: |
+          docker build -t myproftpd .
+          docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 myproftpd
+        # Aquí el contenedor Docker ahora usará las credenciales configuradas
+
       - name: Subir estado de Terraform a S3
         run: |
           aws s3 cp vpcs/terraform.tfstate s3://s3-carlosbullejos2-bucket/terraform.tfstate
@@ -46,3 +53,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "us-east-1" # Cambia a la región de AWS que estás usando
+
