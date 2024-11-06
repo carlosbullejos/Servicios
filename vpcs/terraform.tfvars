@@ -11,6 +11,6 @@ instance_ami                 = "ami-064519b8c76274859"
 instance_type               = "t2.micro"
 key_name                    = "clave-ftp2"
 user_data                   = "script.sh"
-bastion_ip                  = "192.168.1.100"  # Sustituir con la IP permitida para acceder al bastión
+bastion_ip                  = "192.168.1.100/32"  # Sustituir con la IP permitida para acceder al bastión
 s3_bucket_name              = "s3-carlosbullejos2-bucket"  # Nombre del bucket de S3
 ftp_container_name          = "ftp-storage"  # Nombre del contenedor FTP que usará el bucket
