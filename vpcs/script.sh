@@ -18,49 +18,46 @@ sudo systemctl enable docker
 mkdir -p /home/docker
 cd /home/docker
 
-touch Dockerfile
-
-# Configuración del Dockerfile
-echo "FROM debian:latest" >> Dockerfile
+# Crear Dockerfile con el contenido necesario
+cat > Dockerfile <<EOF
+FROM debian:latest
 
 # Instalar dependencias necesarias
-echo "RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     proftpd \
     s3fs \
     fuse \
     ca-certificates \
     curl \
-    && rm -rf /var/lib/apt/lists/*" >> Dockerfile
+    && rm -rf /var/lib/apt/lists/*
 
 # Configuración del FTP
-echo "RUN echo 'PassivePorts 1100 1101' >> /etc/proftpd/proftpd.conf" >> Dockerfile
-echo "RUN echo 'DefaultRoot ~' >> /etc/proftpd/proftpd.conf" >> Dockerfile
-echo "RUN echo 'MasqueradeAddress 54.159.37.114' >> /etc/proftpd/proftpd.conf" >> Dockerfile
-echo "EXPOSE 20 21 1100 1101" >> Dockerfile
+RUN echo 'PassivePorts 1100 1101' >> /etc/proftpd/proftpd.conf
+RUN echo 'DefaultRoot ~' >> /etc/proftpd/proftpd.conf
+RUN echo 'MasqueradeAddress 54.159.37.114' >> /etc/proftpd/proftpd.conf
+EXPOSE 20 21 1100 1101
 
 # Crear usuario FTP
-echo "RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd" >> Dockerfile
-
-# Inyectar las credenciales de AWS usando las variables de entorno
-# Esto asume que las credenciales se pasan como variables de entorno cuando el script se ejecuta
-echo "RUN echo 'AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' > /root/.passwd-s3fs && \
-    echo 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> /root/.passwd-s3fs && \
-    chmod 600 /root/.passwd-s3fs" >> Dockerfile
+RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd
 
 # Crear carpeta para montar el bucket S3
-echo "RUN mkdir -p /ftp-s3" >> Dockerfile
-
-# Montar el bucket S3 como sistema de archivos
-echo "RUN s3fs ftp-storage-bucket /ftp-s3 -o passwd_file=/root/.passwd-s3fs -o url=https://s3.amazonaws.com" >> Dockerfile
+RUN mkdir -p /ftp-s3
 
 # Configurar FTP para usar la carpeta montada en S3
-echo "RUN ln -s /ftp-s3 /home/carlos/ftp-storage" >> Dockerfile
+RUN ln -s /ftp-s3 /home/carlos/ftp-storage
 
 # Comando de arranque de ProFTPD
-echo 'CMD ["proftpd", "--nodaemon"]' >> Dockerfile
+CMD ["proftpd", "--nodaemon"]
+EOF
 
-# Construcción y ejecución del contenedor
+# Construcción del contenedor Docker
 sudo docker build -t myproftpd /home/docker
-sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 myproftpd
+
+# Ejecutar el contenedor Docker pasando las credenciales de AWS como variables de entorno
+sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 \
+    -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
+    -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
+    -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
+    myproftpd
 
 
