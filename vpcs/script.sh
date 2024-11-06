@@ -47,6 +47,6 @@ echo "RUN ln -s /ftp-s3 /home/carlos/ftp-storage" >> Dockerfile
 echo 'CMD ["proftpd", "--nodaemon"]' >> Dockerfile
 
 # Construcción y ejecución del contenedor
-sudo docker build -t myproftpd .
+sudo docker build -t myproftpd /home/docker
 sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 myproftpd
 
