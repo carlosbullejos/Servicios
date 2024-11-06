@@ -1,4 +1,5 @@
 #!/bin/bash
+# Instalación de Docker en la instancia
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -13,21 +14,37 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo systemctl start docker
 sudo systemctl enable docker
 
-
+# Crear Dockerfile para el contenedor FTP
 mkdir -p /home/docker
 cd /home/docker
 
 touch Dockerfile
 
+# Configuración del Dockerfile
 echo "FROM debian:latest" >> Dockerfile
-echo "RUN apt-get update && apt-get install -y proftpd" >> Dockerfile
+echo "RUN apt-get update && apt-get install -y proftpd s3fs" >> Dockerfile
 echo "RUN echo 'PassivePorts 1100 1101' >> /etc/proftpd/proftpd.conf" >> Dockerfile
 echo "RUN echo 'DefaultRoot ~' >> /etc/proftpd/proftpd.conf" >> Dockerfile
 echo "RUN echo 'MasqueradeAddress 54.159.37.114' >> /etc/proftpd/proftpd.conf" >> Dockerfile
 echo "EXPOSE 20 21 1100 1101" >> Dockerfile
+
+# Crear usuario FTP
 echo "RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd" >> Dockerfile
+
+# Añadir credenciales de AWS para s3fs (se deben agregar las credenciales a un archivo)
+echo "RUN echo 'AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY' > /root/.passwd-s3fs && chmod 600 /root/.passwd-s3fs" >> Dockerfile
+
+# Montar el bucket S3 como sistema de archivos
+echo "RUN mkdir -p /ftp-s3" >> Dockerfile
+echo "RUN s3fs ftp-storage-bucket /ftp-s3 -o passwd_file=/root/.passwd-s3fs -o url=https://s3.amazonaws.com" >> Dockerfile
+
+# Configurar FTP para usar la carpeta montada en S3
+echo "RUN ln -s /ftp-s3 /home/carlos/ftp-storage" >> Dockerfile
+
+# Comando de arranque de ProFTPD
 echo 'CMD ["proftpd", "--nodaemon"]' >> Dockerfile
 
+# Construcción y ejecución del contenedor
 sudo docker build -t myproftpd .
 sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 myproftpd
 
