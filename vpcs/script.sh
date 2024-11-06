@@ -42,6 +42,7 @@ echo "EXPOSE 20 21 1100 1101" >> Dockerfile
 echo "RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd" >> Dockerfile
 
 # Inyectar las credenciales de AWS usando las variables de entorno
+# Esto asume que las credenciales se pasan como variables de entorno cuando el script se ejecuta
 echo "RUN echo 'AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' > /root/.passwd-s3fs && \
     echo 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> /root/.passwd-s3fs && \
     chmod 600 /root/.passwd-s3fs" >> Dockerfile
