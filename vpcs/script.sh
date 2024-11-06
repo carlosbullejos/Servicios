@@ -31,8 +31,10 @@ echo "EXPOSE 20 21 1100 1101" >> Dockerfile
 # Crear usuario FTP
 echo "RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd" >> Dockerfile
 
-# Añadir credenciales de AWS para s3fs (se deben agregar las credenciales a un archivo)
-echo "RUN echo 'AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY' > /root/.passwd-s3fs && chmod 600 /root/.passwd-s3fs" >> Dockerfile
+# Inyectar las credenciales de AWS usando las variables de entorno
+echo "RUN echo 'AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' > /root/.passwd-s3fs && \
+    echo 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> /root/.passwd-s3fs && \
+    chmod 600 /root/.passwd-s3fs" >> Dockerfile
 
 # Montar el bucket S3 como sistema de archivos
 echo "RUN mkdir -p /ftp-s3" >> Dockerfile
