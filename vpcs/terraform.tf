@@ -178,8 +178,3 @@ resource "aws_s3_bucket" "ftp_storage" {
   bucket = "my-ftp-storage-bucket"
 }
 
-resource "aws_s3_bucket_acl" "ftp_storage_acl" {
-  bucket = aws_s3_bucket.ftp_storage.id
-  acl    = "private"  # Configura el ACL de forma explícita
-}
-
