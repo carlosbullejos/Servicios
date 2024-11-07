@@ -152,7 +152,7 @@ resource "aws_instance" "instancia_ftp" {
   subnet_id              = aws_subnet.vpc1_public_subnet.id
   vpc_security_group_ids = [aws_security_group.ftp_security_group.id]
   key_name               = var.key_name
-  user_data              = file("userdata.sh")
+  user_data              = file("script.sh")
   tags = {
     Name = "InstanciaFTP"
   }
