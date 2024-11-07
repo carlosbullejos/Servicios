@@ -157,6 +157,7 @@ resource "aws_instance" "instancia-ftp" {
   vpc_security_group_ids = [aws_security_group.ftp_security_group.id]
   key_name               = var.key_name
   user_data              = file(var.user_data)
+  iam_instance_profile   = aws_iam_role.s3_access_role.name
   tags = {
     Name = "InstanciaFTP"
   }
@@ -176,5 +177,42 @@ resource "aws_instance" "bastion_host" {
 
 resource "aws_s3_bucket" "ftp_storage" {
   bucket = "my-ftp-storage-bucket"
+  acl    = "private"
+}
+
+resource "aws_iam_role" "s3_access_role" {
+  name = "ftp-s3-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action    = "sts:AssumeRole",
+        Effect    = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "s3_access_policy" {
+  name   = "ftp-s3-access-policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = ["s3:*"],
+        Resource = ["arn:aws:s3:::${aws_s3_bucket.ftp_storage.bucket}/*"]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
+  role       = aws_iam_role.s3_access_role.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
