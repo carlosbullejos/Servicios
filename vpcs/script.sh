@@ -68,9 +68,3 @@ sudo docker run -d -p 20:20 -p 21:21 -p 1100:1100 -p 1101:1101 -v /home/admin/ft
 # Configuración de sincronización con S3
 sudo apt-get install -y awscli
 
-# Crear directorio para sincronizar con S3
-mkdir -p /home/ubuntu/ftp-s3
-
-# Sincronizar el bucket S3 con el directorio de la instancia
-aws s3 sync s3://my-ftp-storage-bucket /home/ubuntu/ftp-s3
-
