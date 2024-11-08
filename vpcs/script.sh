@@ -54,8 +54,6 @@ CMD ["cron", "-f"]
 # Crear usuario FTP
 RUN useradd -m -s /bin/bash carlos && echo 'carlos:carlos' | chpasswd
 RUN service cron restart 
-# Directorio FTP en contenedor
-VOLUME /ftp
 
 # Comando de arranque de ProFTPD
 CMD ["proftpd", "--nodaemon"]
