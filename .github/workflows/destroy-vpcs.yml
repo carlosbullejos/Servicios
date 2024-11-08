@@ -1,37 +1,42 @@
-name: Destroy Terraform AWS Deployment
+name: Terraform AWS Destroy
 
 on:
-  workflow_dispatch:
-    # Esto permite ejecutar manualmente el workflow de destrucción
+  workflow_dispatch:  # Permite ejecutar el flujo de trabajo manualmente desde GitHub
 
 jobs:
-  terraform-destroy:
+  terraform:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Download terraform state
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform_state
-          path: vpcs
 
-      - name: instalar terraform
+      - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: credentials aws configure
+      - name: Configurar credenciales de AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1" # Cambia a la región de AWS que estás usando
+          aws-region: "us-east-1"  # Cambia a la región de AWS que estás usando
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
-      - name: init terraform
+      - name: Configurar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Inicializar Terraform
         run: terraform init
         working-directory: vpcs
 
-      - name: destroy terraform
+      - name: Planificar destrucción de Terraform
+        run: terraform plan -destroy
+        working-directory: vpcs
+
+      - name: Destruir infraestructura de Terraform
         run: terraform destroy -auto-approve
         working-directory: vpcs
+
