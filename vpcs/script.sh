@@ -1,4 +1,4 @@
- user_data = <<-EOF
+
     #!/bin/bash
     # Actualizar el repositorio e instalar Docker y s3fs
     sudo apt-get update
@@ -40,5 +40,3 @@
     cd /home/admin/proftp
     sudo docker build -t proftp .
     sudo docker run -d --name proftp -p 21:21 -p 20:20 -p 1100-1100:1101-1101 -v /home/admin/carpeta_bucket:/home/carlos proftp
-  EOF
-}
