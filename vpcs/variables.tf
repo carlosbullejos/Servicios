@@ -1,79 +1,79 @@
 variable "aws_region" {
-  description = "AWS Region"
+  description = "Region"
   type        = string
 }
 
 variable "vpc1_cidr_block" {
-  description = "CIDR block for VPC1"
+  description = "Red para vpc1"
   type        = string
 }
 
 variable "vpc1_public_subnet_cidr" {
-  description = "CIDR block for VPC1 public subnet"
+  description = "Red para subred 1"
   type        = string
 }
 
 variable "vpc1_private_subnet_cidr" {
-  description = "CIDR block for VPC1 private subnet"
+  description = "Red para subnet privada"
   type        = string
 }
 
 variable "vpc2_cidr_block" {
-  description = "CIDR block for VPC2"
+  description = ""
   type        = string
 }
 
 variable "vpc2_private_subnet_cidr" {
-  description = "CIDR block for VPC2 private subnet"
+  description = "Subnet privada de vpc2"
   type        = string
 }
 
 variable "availability_zone1" {
-  description = "Availability zone for VPC1"
+  description = "Zona disponibilidad 1"
   type        = string
 }
 
 variable "availability_zone2" {
-  description = "Availability zone for VPC2"
+  description = "Zonda disponibilidad2"
   type        = string
 }
 
 variable "allowed_cidr" {
-  description = "CIDR block for allowed IPs"
+  description = "IPs permitidas"
   type        = string
 }
 
 variable "instance_ami" {
-  description = "AMI ID for the instance"
+  description = "ID del AMI debian"
   type        = string
 }
 
 variable "instance_type" {
-  description = "Type of instance"
+  description = "tipo de instancia"
   type        = string
 }
 
 variable "key_name" {
-  description = "The name of the SSH key pair"
+  description = "nombre clave ssh"
   type        = string
 }
 
 variable "user_data" {
-  description = "User data script"
+  description = "script ejecutar instancia"
   type        = string
 }
 
 variable "bastion_ip" {
-  description = "IP address of the bastion host"
+  description = "Ip bastionado"
   type        = string
 }
 
 variable "s3_bucket_name" {
-  description = "Name of the S3 bucket for FTP"
+  description = "Nombre del bucket"
   type        = string
 }
 
 variable "ftp_container_name" {
-  description = "Name of the Docker container for FTP"
+  description = "Nombre del contenedor de ftp"
   type        = string
 }
