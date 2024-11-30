@@ -31,10 +31,9 @@ jobs:
           TF_LOG: DEBUG
 
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform plan -input=false -var "vpc2_public_subnet_cidr=10.1.2.0/24"
         working-directory: ./vpcs
-        env:
-          TF_LOG: DEBUG
+
 
 
       - name: Terraform Apply
