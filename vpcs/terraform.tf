@@ -1,27 +1,25 @@
-  provider "aws" {
+provider "aws" {
     region = var.aws_region
   }
 
   # VPC 1 con subred pública y privada
-  resource "aws_vpc" "vpc1" {
+resource "aws_vpc" "vpc1" {
     cidr_block = var.vpc1_cidr_block
   }
 
-  resource "aws_internet_gateway" "vpc1_igw" {
+resource "aws_internet_gateway" "vpc1_igw" {
     vpc_id = aws_vpc.vpc1.id
   }
 
-  resource "aws_subnet" "vpc1_public_subnet" {
+resource "aws_subnet" "vpc1_public_subnet" {
     vpc_id                  = aws_vpc.vpc1.id
     cidr_block              = var.vpc1_public_subnet_cidr
     availability_zone       = var.availability_zone1
     map_public_ip_on_launch = true
   }
-
 resource "aws_eip" "vpc2_nat_eip" {
   vpc = true
 }
-
 resource "aws_nat_gateway" "vpc2_nat_gateway" {
   allocation_id = aws_eip.vpc2_nat_eip.id
   subnet_id     = aws_subnet.vpc2_public_subnet.id
@@ -32,31 +30,29 @@ resource "aws_nat_gateway" "vpc2_nat_gateway" {
     cidr_block = var.vpc2_cidr_block
 
   }
-
-  resource "aws_subnet" "vpc2_public_subnet" {
+resource "aws_subnet" "vpc2_public_subnet" {
   vpc_id                  = aws_vpc.vpc2.id
   cidr_block              = var.vpc2_public_subnet_cidr
   availability_zone       = var.availability_zone2
   map_public_ip_on_launch = true
 }
-  resource "aws_subnet" "vpc2_private_subnet" {
+resource "aws_subnet" "vpc2_private_subnet" {
     vpc_id            = aws_vpc.vpc2.id
     cidr_block        = var.vpc2_private_subnet_cidr
     availability_zone = var.availability_zone1
   }
-
 resource "aws_internet_gateway" "vpc2_igw" {
   vpc_id = aws_vpc.vpc2.id
 }
   # Peering entre VPCs
-  resource "aws_vpc_peering_connection" "vpc1_vpc2_peering" {
+resource "aws_vpc_peering_connection" "vpc1_vpc2_peering" {
     vpc_id      = aws_vpc.vpc1.id
     peer_vpc_id = aws_vpc.vpc2.id
     auto_accept = true
   }
 
   # Tabla de rutas para el tráfico de internet en la subred pública de VPC 1
-  resource "aws_route_table" "vpc1_public_route_table" {
+resource "aws_route_table" "vpc1_public_route_table" {
     vpc_id = aws_vpc.vpc1.id
 
     route {
@@ -65,7 +61,7 @@ resource "aws_internet_gateway" "vpc2_igw" {
     }
   }
 
-  resource "aws_route_table_association" "vpc1_public_route_assoc" {
+resource "aws_route_table_association" "vpc1_public_route_assoc" {
     subnet_id      = aws_subnet.vpc1_public_subnet.id
     route_table_id = aws_route_table.vpc1_public_route_table.id
   }
@@ -102,7 +98,7 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
   # Rutas de peering entre VPCs usando recursos aws_route separados
 
   # Ruta en VPC 1 para llegar a VPC 2
-  resource "aws_route" "route_vpc1_to_vpc2" {
+resource "aws_route" "route_vpc1_to_vpc2" {
     route_table_id           = aws_route_table.vpc1_public_route_table.id
     destination_cidr_block   = aws_vpc.vpc2.cidr_block
     vpc_peering_connection_id = aws_vpc_peering_connection.vpc1_vpc2_peering.id
@@ -117,7 +113,7 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
 
   # Grupos de seguridad y otras configuraciones permanecen igual...
 
-  resource "aws_security_group" "ftp_security_group" {
+resource "aws_security_group" "ftp_security_group" {
     vpc_id = aws_vpc.vpc1.id
     name   = "ftp_security_group"
 
@@ -159,7 +155,7 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
 
 
   # Security Group para el servidor LDAP en la VPC2
-  resource "aws_security_group" "ldap_security_group" {
+resource "aws_security_group" "ldap_security_group" {
     vpc_id = aws_vpc.vpc2.id
     name   = "ldap_security_group"
 
@@ -198,8 +194,7 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
   }
 
 
-
-  resource "aws_instance" "instancia_ftp" {
+resource "aws_instance" "instancia_ftp" {
     ami                    = var.instance_ami
     instance_type          = var.instance_type
     subnet_id              = aws_subnet.vpc1_public_subnet.id
@@ -215,7 +210,7 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
  
 
   # Bastion Host
-  resource "aws_instance" "bastion_host" {
+resource "aws_instance" "bastion_host" {
     ami                          = var.instance_ami
     instance_type                = var.instance_type
     subnet_id                    = aws_subnet.vpc1_public_subnet.id
@@ -247,13 +242,13 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
   }
 
   # Bucket S3 para almacenamiento FTP
-  resource "aws_s3_bucket" "ftp_storage" {
+resource "aws_s3_bucket" "ftp_storage" {
     bucket = "my-ftp-storage-bucket"
     force_destroy = true
   }
 
  # Instancia LDAP en la subred privada de VPC2
-  resource "aws_instance" "instancia_ldap" {
+resource "aws_instance" "instancia_ldap" {
     ami                    = var.instance_ami
     instance_type          = var.instance_type
     subnet_id              = aws_subnet.vpc2_private_subnet.id
