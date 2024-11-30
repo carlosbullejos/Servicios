@@ -98,3 +98,4 @@ variable "aws_session_token" {
 variable "public_key" {
   description = "Clave pública SSH para acceder a la instancia"
   type        = string
+}
