@@ -1,79 +1,100 @@
 variable "aws_region" {
-  description = "Region"
+  description = "AWS Region"
   type        = string
 }
 
 variable "vpc1_cidr_block" {
-  description = "Red para vpc1"
+  description = "CIDR block for VPC1"
   type        = string
 }
 
 variable "vpc1_public_subnet_cidr" {
-  description = "Red para subred 1"
+  description = "CIDR block for VPC1 public subnet"
   type        = string
 }
 
 variable "vpc1_private_subnet_cidr" {
-  description = "Red para subnet privada"
+  description = "CIDR block for VPC1 private subnet"
   type        = string
 }
 
 variable "vpc2_cidr_block" {
-  description = ""
+  description = "CIDR block for VPC2"
   type        = string
 }
 
 variable "vpc2_private_subnet_cidr" {
-  description = "Subnet privada de vpc2"
+  description = "CIDR block for VPC2 private subnet"
+  type        = string
+}
+
+variable "vpc2_public_subnet_cidr" {
+  description = "CIDR block for VPC2 public subnet"
   type        = string
 }
 
 variable "availability_zone1" {
-  description = "Zona disponibilidad 1"
+  description = "Availability zone for VPC1"
   type        = string
 }
 
 variable "availability_zone2" {
-  description = "Zonda disponibilidad2"
+  description = "Availability zone for VPC2"
   type        = string
 }
 
 variable "allowed_cidr" {
-  description = "IPs permitidas"
+  description = "CIDR block for allowed IPs"
   type        = string
 }
 
 variable "instance_ami" {
-  description = "ID del AMI debian"
+  description = "AMI ID for the instance"
   type        = string
 }
 
 variable "instance_type" {
-  description = "tipo de instancia"
+  description = "Type of instance"
   type        = string
 }
 
 variable "key_name" {
-  description = "nombre clave ssh"
+  description = "The name of the SSH key pair"
   type        = string
 }
 
 variable "user_data" {
-  description = "script ejecutar instancia"
+  description = "User data script"
   type        = string
 }
 
 variable "bastion_ip" {
-  description = "Ip bastionado"
+  description = "IP address of the bastion host"
   type        = string
 }
 
 variable "s3_bucket_name" {
-  description = "Nombre del bucket"
+  description = "Name of the S3 bucket for FTP"
   type        = string
 }
 
 variable "ftp_container_name" {
-  description = "Nombre del contenedor de ftp"
+  description = "Name of the Docker container for FTP"
   type        = string
 }
+
+variable "aws_access_key_id" {
+  type = string
+}
+
+variable "aws_secret_access_key" {
+  type = string
+}
+
+variable "aws_session_token" {
+  type = string
+}
+
+variable "public_key" {
+  description = "Clave pública SSH para acceder a la instancia"
+  type        = string
