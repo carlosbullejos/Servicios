@@ -267,8 +267,3 @@ resource "aws_route_table_association" "vpc2_private_route_assoc" {
       Name = "InstanciaLDAP"
     }
   }
-
-  resource "aws_key_pair" "ssh_susana" { 
-    key_name = var.key_name
-    public_key = var.public_key 
-  }
