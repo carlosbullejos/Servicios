@@ -26,7 +26,4 @@ spec:
               name: mysql-storage
       imagePullSecrets:
         - name: regcred
-      volumes:
-        - name: mysql-storage
-          persistentVolumeClaim:
-            claimName: mysql-pvc
+      
