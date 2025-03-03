@@ -21,9 +21,7 @@ spec:
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: "my_passwd"
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: mysql-storage
+   
       imagePullSecrets:
         - name: regcred
       
