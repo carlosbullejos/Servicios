@@ -3,8 +3,8 @@ name: Deploy to EKS
 on:
   push:
     branches:
-      - main
-
+      - kubernetes-ansible
+    
 jobs:
   deploy:
     runs-on: ubuntu-latest
