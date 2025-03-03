@@ -16,6 +16,7 @@ spec:
       containers:
         - name: carlos-web
           image: 210486000475.dkr.ecr.us-east-1.amazonaws.com/carlos-web:2.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
             - containerPort: 443
