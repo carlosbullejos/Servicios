@@ -15,13 +15,11 @@ spec:
       containers:
         - name: mysql
           image: 210486000475.dkr.ecr.us-east-1.amazonaws.com/mysql:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 3306
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: "my_passwd"
-   
+          envFrom:
+            - configMapRef:
+                name: mysql-config
       imagePullSecrets:
         - name: regcred
-      
