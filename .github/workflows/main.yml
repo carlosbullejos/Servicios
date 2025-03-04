@@ -1,9 +1,6 @@
-name: Deploy to EKS
-
+name: EKS
 on:
-  push:
-    branches:
-      - kubernetes-ansible
+  workflow_dispatch:
     
 jobs:
   deploy:
