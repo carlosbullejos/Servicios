@@ -1,0 +1,119 @@
+map $http_accept_language $lang {
+    default en;
+    ~*^es es;
+    ~*^en en;
+}
+
+# Redirigir todo HTTP a HTTPS
+server {
+    listen 80;
+    server_name localhost localhost2 sitio1.localhost sitio2.localhost;
+
+    return 301 https://$host$request_uri;
+}
+
+# Configuración base HTTPS
+server {
+    listen 443 ssl;
+    server_name pagina.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    root /var/www/html;
+    index index.php index.html;
+
+  location / {
+        
+        try_files /$lang$uri $lang$uri /$lang/index.html /index.php?$args;
+    }
+
+      error_page 404 /404.html;
+
+    
+    error_page 500 502 503 504 /50x.html;
+
+    location = /404.html {
+        root /var/www/html;  
+        internal;            
+    }
+
+    location = /50x.html {
+        root /var/www/html;  
+        internal;            
+    }
+
+      location ~ \.php$ {
+        fastcgi_pass php-fpm-service:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+	}
+
+server {
+    listen 443;
+    server_name ldap.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    location /protegido {
+        proxy_pass http://apache:8080/protegido;        
+	proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+# Virtual Host: Sitio 1
+server {
+    listen 443 ssl;
+    server_name sitio1.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    root /var/www/html/sitio1;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# Virtual Host: Sitio 2
+server {
+    listen 443 ssl;
+    server_name sitio2.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    root /var/www/html/sitio2;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+
+# Configuración para directorios de usuario (Ejemplo: tudominio.com/~usuari>
+server {
+    listen 443 ssl;
+    server_name webusuarios.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    location ~ ^/~(.+?)(/.*)?$ {
+ alias /home/$1/public_html$2;
+ index  index.html index.htm;
+ autoindex on;
+}
+}
+
+
+    

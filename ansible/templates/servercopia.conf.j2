@@ -1,0 +1,26 @@
+map $http_accept_language $lang {
+    default en;
+    ~*^es es;
+    ~*^en en;
+}
+
+server {
+    listen 80;
+    server_name localhost sitio1.tudominio.com sitio2.tudominio.com;
+
+    return 301 https://$host$request_uri;
+}
+
+# Configuración base HTTPS
+server {
+    listen 443 ssl;
+    server_name pagina.jbulgom483.work.gd;
+
+    ssl_certificate /etc/ssl/certs/ca_bundle.crt;
+    ssl_certificate_key /etc/ssl/private/private.key;
+
+    root /var/www/html;
+    index index1-0.html;
+
+}
+
