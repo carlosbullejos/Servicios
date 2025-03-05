@@ -1,0 +1,325 @@
+---
+- name: Configurar y ejecutar NGINX en contenedor Docker remoto
+  hosts: web
+  become: true
+
+  vars_files:
+    - /home/web/vars/main.yml
+
+  tasks:
+    - name: Asegurar que Docker está corriendo
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Copiar archivos de configuración al servidor remoto
+      ansible.builtin.copy:
+        src: "/home/web/templates/{{ item.src }}"
+        dest: "/home/web2/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - { src: "default.conf.j2", dest: "nginx.conf", mode: "0644" }
+        - { src: "server.conf.j2", dest: "server.conf", mode: "0644" }
+        - { src: "estilos.css.j2", dest: "estilos.css", mode: "0644" }
+        - { src: "index.html.j2", dest: "index.html", mode: "0644" }
+        - { src: "indexdefault.html.j2", dest: "indexdefault.html", mode: "0644" }
+        - { src: "indexingles.html.j2", dest: "indexingles.html", mode: "0644" }
+        - { src: "index_sitio1.html.j2", dest: "index_sitio1.html", mode: "0644" }
+        - { src: "index_sitio2.html.j2", dest: "index_sitio2.html", mode: "0644" }
+        - { src: "index_usuario1.html.j2", dest: "index_usuario1.html", mode: "0644" }
+        - { src: "index_usuario2.html.j2", dest: "index_usuario2.html", mode: "0644" }
+    - name: Copiar archivos de configuración al servidor remoto
+      ansible.builtin.copy:
+        src: "/home/web/templates/{{ item.src }}"
+        dest: "/home/web/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - { src: "default.conf.j2", dest: "nginx.conf", mode: "0644" }
+        - { src: "servercopia.conf.j2", dest: "server.conf", mode: "0644" }
+       
+
+    - name: Copiar certificados SSL al servidor remoto
+      ansible.builtin.copy:
+        src: "/etc/ssl/certs/{{ item.src }}"
+        dest: "/home/web/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - { src: "ca_bundle.crt", dest: "ca_bundle.crt", mode: "0644" }
+        - { src: "../private/private.key", dest: "private.key", mode: "0600" }
+
+
+    - name: Copiar certificados SSL al servidor remoto
+      ansible.builtin.copy:
+        src: "/etc/ssl/certs/{{ item.src }}"
+        dest: "/home/web2/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - { src: "ca_bundle.crt", dest: "ca_bundle.crt", mode: "0644" }
+        - { src: "../private/private.key", dest: "private.key", mode: "0600" }
+
+
+    - name: Copiar Dockerfile al servidor remoto
+      ansible.builtin.copy:
+        src: /home/web/templates/Dockerfile.j2
+        dest: /home/web2/Dockerfile
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Copiar Dockerfile al servidor remoto
+      ansible.builtin.copy:
+        src: /home/web/templates/Dockerfile1-0.j2
+        dest: /home/web/Dockerfile
+        owner: root
+        group: root
+        mode: "0644"
+
+
+    - name: Detener y eliminar contenedor existente (si existe)
+      ansible.builtin.command:
+        cmd: docker rm -f carlos-web-1.0
+      ignore_errors: true
+
+    - name: Detener y eliminar contenedor existente (si existe)
+      ansible.builtin.command:
+        cmd: docker rm -f carlos-web-2.0
+      ignore_errors: true
+
+    - name: Obtener autenticación en ECR
+      ansible.builtin.shell: "aws ecr get-login-password --region us-east-1"
+      register: login_password
+
+    -  name: Iniciar sesión en ECR usando docker login
+       ansible.builtin.shell: "echo {{ login_password.stdout }} | docker login --username AWS --password-stdin 210486000475.dkr.ecr.us-east-1.amazonaws.com"
+       delegate_to: "{{ inventory_hostname }}"
+       register: docker_login_result
+
+    -  name:
+       ansible.builtin.command:
+        cmd: docker build -t carlos-web:1.0 /home/web/
+
+
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag carlos-web:1.0 210486000475.dkr.ecr.us-east-1.amazonaws.com/carlos-web:1.0
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/carlos-web:1.0
+
+
+    -  name:
+       ansible.builtin.command:
+        cmd: docker build -t carlos-web:2.0 /home/web2/
+
+    - name: Ejecutar contenedor con la nueva imagen
+      ansible.builtin.command:
+        cmd: >
+          docker run -d -p 80:80 -p 443:443
+          --name carlos-web-2.0
+          carlos-web:2.0
+
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag carlos-web:2.0 210486000475.dkr.ecr.us-east-1.amazonaws.com/carlos-web:2.0
+
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/carlos-web:2.0
+
+- name: Desplegar contenedores PHP-FPM y MySQL en Rocky Linux
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Crear directorio para Dockerfiles en Rocky Linux
+      file:
+        path: /home/web/php_fpm
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Crear directorio para Dockerfiles en Rocky Linux
+      file:
+        path: /home/web/mysql
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copiar Dockerfile de PHP-FPM a Rocky Linux
+      template:
+        src: /home/web/templates/Dockerfile_php.j2
+        dest: /home/web/php_fpm/Dockerfile
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copiar Dockerfile de MySQL a Rocky Linux
+      template:
+        src: /home/web/templates/Dockerfile_mysql.j2
+        dest: /home/web/mysql/Dockerfile
+        owner: root
+        group: root
+        mode: '0644'
+
+    -  name: Construyendo imagen PHP
+       ansible.builtin.command:
+        cmd: docker build -t php-fpm /home/web/php_fpm/
+
+    - name: Ejecutar contenedor con la nueva imagen
+      ansible.builtin.command:
+        cmd: >
+          docker run -d -p 9000:9000
+          --name php-fpm
+          php-fpm
+
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag php-fpm:latest 210486000475.dkr.ecr.us-east-1.amazonaws.com/php-fpm:latest
+
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/php-fpm:latest
+
+
+    - name: Construyendo imagen MYSQL
+      ansible.builtin.command:
+        cmd: docker build -t mysql-carlosbullejos /home/web/mysql/
+
+    - name: Ejecutar contenedor con la nueva imagen
+      ansible.builtin.command:
+        cmd: >
+          docker run -d -p 3306:3306
+          --name mysql-carlosbullejos
+          mysql-carlosbullejos
+
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag mysql-carlosbullejos:latest 210486000475.dkr.ecr.us-east-1.amazonaws.com/mysql:latest
+
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/mysql:latest
+
+    - name: Crear directorio para Dockerfile LDAP y APACHE
+      file:
+        path: /home/web/ldap
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Crear directorio para Dockerfile APACHE en Rocky Linux
+      file:
+        path: /home/web/apache
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copiar Dockerfile de LDAP a Rocky Linux
+      template:
+        src: /home/web/templates/Dockerfile_ldap.j2
+        dest: /home/web/ldap/Dockerfile
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copiar bootstrap.ldif de LDAP a Rocky Linux
+      template:
+        src: /home/web/templates/bootstrap.ldif.j2
+        dest: /home/web/ldap/bootstrap.ldif
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copiar entrypoint de LDAP a Rocky Linux
+      template:
+        src: /home/web/templates/entrypoint.sh.j2
+        dest: /home/web/ldap/entrypoint.sh
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Copiar Dockerfile de APACHE a Rocky Linux
+      template:
+        src: /home/web/templates/Dockerfile_apache.j2
+        dest: /home/web/apache/Dockerfile
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copiar pagina apache a Rocky Linux
+      template:
+        src: /home/web/templates/apache_conf.j2
+        dest: /home/web/apache/auth-ldap.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copiar pagina protegido a apache.
+      template:
+        src: /home/web/templates/pagina-ldap.html.j2
+        dest: /home/web/apache/pagina-ldap.html
+        owner: root
+        group: root
+        mode: '0644'
+
+
+
+    -  name: Construyendo imagen LDAP
+       ansible.builtin.command:
+        cmd: docker build -t ldap /home/web/ldap/
+
+    -  name: Creando contenedor LDAP
+       ansible.builtin.command:
+        cmd: docker run -d -p 389:389 --name ldap ldap
+
+    -  name: Pausa adicional para asegurar que LDAP esté listo
+       ansible.builtin.pause:
+        seconds: 10
+
+    -  name: Creando OU y Usuarios en LDAP
+       ansible.builtin.command:
+        cmd: docker exec ldap ldapadd -x -D "cn=admin,dc=carlosftp,dc=com" -w admin_password -f /tmp/bootstrap.ldif
+    -  name: Creando OU y Usuarios en LDAP
+       ansible.builtin.command:
+        cmd: docker exec ldap ldappasswd -x -D "cn=admin,dc=carlosftp,dc=com" -w admin_password -s "daniel" "uid=daniel,ou=users,dc=carlosftp,dc=com"
+    -  name: Creando OU y Usuarios en LDAP
+       ansible.builtin.command:
+        cmd: docker exec ldap ldappasswd -x -D "cn=admin,dc=carlosftp,dc=com" -w admin_password -s "alejandro" "uid=alejandro,ou=users,dc=carlosftp,dc=com"
+    -  name: Reiniciando contenedor LDAP
+       ansible.builtin.command:
+        cmd: docker restart ldap
+    -  name: Creando imagen LDAP con Docker commit
+       ansible.builtin.command:
+        cmd: docker commit ldap ldap2
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag ldap2:latest 210486000475.dkr.ecr.us-east-1.amazonaws.com/ldap:latest
+
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/ldap:latest
+
+
+    - name: Construyendo imagen APACHE
+      ansible.builtin.command:
+        cmd: docker build -t apache /home/web/apache/
+
+
+    - name: Etiquetar la imagen para ECR
+      ansible.builtin.command:
+        cmd: docker tag apache:latest 210486000475.dkr.ecr.us-east-1.amazonaws.com/apache:latest
+
+    - name: Subir la imagen a ECR
+      ansible.builtin.command:
+        cmd: docker push 210486000475.dkr.ecr.us-east-1.amazonaws.com/apache:latest
+
